@@ -61,6 +61,8 @@ considered and consciously postponed, not overlooked (see `DECISIONS.md`).
   for 48h and cannot return the bytes. (DECISIONS D8.)
 - **Asynchronous processing.** Long videos run synchronously behind a loading state today; a
   production version would use a job queue plus status polling. (DECISIONS D5.)
+- **Rate-limit resilience.** A Gemini `429` today surfaces as a failed request; production would
+  retry with backoff and optionally fall back to a second API key.
 - Unit tests on the schema/column logic, Markdown/CSV export, saved column templates, and
   full-resolution screenshot download.
 
@@ -68,8 +70,10 @@ considered and consciously postponed, not overlooked (see `DECISIONS.md`).
 
 - `PLAN.md` — the step-by-step build plan and time boxes.
 - `DECISIONS.md` — the running log of decisions and tradeoffs (the walkthrough spine).
-- `resources/`: provided assignment materials (instruction PDF, demo videos, Gemini API docs);
-  kept locally and gitignored, so they are not part of this public repo.
+- `resources/instruction.pdf`: the assignment brief this project is built from.
+- `resources/instruction-google-api.md`: the empirically verified Gemini API reference (the
+  learning output that `lib/gemini.ts` and `lib/schema.ts` were built against).
+- `resources/` also holds the demo videos and vendor API docs, which stay local-only (gitignored).
 
 ## Quick start
 

@@ -259,7 +259,7 @@ Each milestone ends with the cadence: self-test, walkthrough, joint checkpoint t
 ### M2: Gemini integration (25 min, MVP) - the core value
 - Prereq (done in parallel, not inline): a separate session empirically probes the live API against
   the 3 compliant samples (D9, D10) and writes a narrowed reference at
-  `resources/google-api/instruction-google-api.md`: confirmed model name, the
+  `resources/instruction-google-api.md`: confirmed model name, the
   generateContent-vs-Interactions verdict, the exact File API flow, and the real output / timestamp
   shape. Read that file first and update DECISIONS D4 from it before wiring.
 - Files: `lib/prompt.ts`, `lib/schema.ts`, `lib/gemini.ts`; wire route steps 5-6 (replace the stub).

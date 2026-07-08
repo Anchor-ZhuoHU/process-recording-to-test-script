@@ -53,6 +53,16 @@ was made. Newest at the bottom.
   `responseSchema` + `mediaResolution` (`Type.OBJECT/ARRAY/STRING`, `FileState.ACTIVE/PROCESSING/
   FAILED`). API mechanics are confirmed; the M2 spike now only needs to verify the model name
   and output quality on a real video.
+- Update (M2, verified by live calls, separate probe session): confirmed and locked. Model
+  `gemini-3.5-flash` (fallback `gemini-2.5-flash`). `generateContent` + `responseMimeType:
+  application/json` + `responseSchema` returned schema-valid JSON on the first try for all 3
+  in-scope videos (18-19 steps, `finishReason` STOP). The Interactions API was tried and rejected:
+  it refuses a `json_schema` response_format, and its loose `array` output was coarser (10 steps vs
+  18). Timestamps come back as zero-padded MM:SS, second-accurate against pixels. Leave
+  `mediaResolution` unset; `maxOutputTokens` 16384; errors are thrown as `ApiError` (`.status` /
+  `.message`), while `FileState.FAILED` does not throw (checked explicitly). Our first real app run
+  extracted 11 clean steps from the 1:47 sample (PO `4500055191`, Material Doc `5000055610`, exact
+  field values). Full reference: `resources/instruction-google-api.md`.
 
 ## D5. Processing model: synchronous request + loading state (prototype)
 - Decision: `/api/process` does upload -> generate -> extract frames synchronously and returns
@@ -104,8 +114,17 @@ was made. Newest at the bottom.
   generateContent API version at `resources/google-api/generate-content-api/`.
 - Decision: a parallel session probes the live API locally against only the 3 compliant samples
   (D9), compares both API variants, and distills a narrowed, project-specific reference at
-  `resources/google-api/instruction-google-api.md`. `lib/gemini.ts` and `lib/schema.ts` are written
+  `resources/instruction-google-api.md`. `lib/gemini.ts` and `lib/schema.ts` are written
   against that distilled instruction, not the full official docs.
 - Why it matters: the Gemini integration is coded from verified behavior (confirmed model name,
   generateContent-vs-Interactions verdict, exact output/timestamp shape) instead of guesses, and we
   keep only the slice we need. The probe's findings feed back into D4.
+
+## D11. Progress feedback: elapsed timer + indeterminate bar (prototype UX)
+- Feedback (Anchor): the first upload felt frozen; nothing signalled that the app was working
+  during the 15-30s Gemini call.
+- Decision: Gemini exposes no real progress, so show honest indeterminate feedback: a live
+  elapsed-seconds counter, a moving bar, and a "usually 15-30s" hint, and disable the submit button
+  against a double-fire.
+- Why it matters: a synchronous long call needs a liveness signal. A fake percentage would be
+  dishonest; an elapsed timer is truthful and enough to reassure the user.

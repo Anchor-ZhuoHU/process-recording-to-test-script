@@ -5,6 +5,7 @@ import { DEFAULT_COLUMNS } from "@/lib/columns";
 import type { ProcessResult } from "@/lib/types";
 import UploadForm from "@/components/UploadForm";
 import StepsTable from "@/components/StepsTable";
+import ProgressIndicator from "@/components/ProgressIndicator";
 
 export default function Home() {
   // M4 makes this editable via ColumnConfig; for now it is the fixed default template.
@@ -29,7 +30,7 @@ export default function Home() {
         onError={setError}
       />
 
-      {loading && <p className="mt-6 text-sm text-zinc-500">Generating test script...</p>}
+      {loading && <ProgressIndicator />}
       {error && <p className="mt-6 text-sm text-red-600">{error}</p>}
       {result && <StepsTable result={result} />}
     </main>

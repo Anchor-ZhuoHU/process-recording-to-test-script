@@ -1,13 +1,29 @@
+import { randomUUID } from "node:crypto";
+import { writeFile, unlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { DEFAULT_COLUMNS, validateColumns } from "@/lib/columns";
-import type { ProcessResult, Step } from "@/lib/types";
+import { uploadVideo, extractSteps } from "@/lib/gemini";
+import type { ProcessResult } from "@/lib/types";
 
-// The pipeline needs Node APIs (temp files, ffmpeg spawn) in later milestones, and long videos
-// need a generous budget, so pin the Node runtime here from the start.
+// The pipeline needs Node APIs (temp files, and ffmpeg spawn in M3), and video processing is slow,
+// so pin the Node runtime with a generous budget.
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-// M1 walking skeleton: parse + validate the request, then return a hardcoded 2-step stub whose
-// values match the requested columns. The real Gemini call and screenshots arrive in M2 and M3.
+// Browsers usually set File.type; fall back to extension so .mov maps to video/quicktime.
+function inferMimeType(name: string, provided: string): string {
+  if (provided) {
+    return provided;
+  }
+  const ext = name.toLowerCase().split(".").pop();
+  if (ext === "mov") return "video/quicktime";
+  if (ext === "webm") return "video/webm";
+  return "video/mp4";
+}
+
+// M2: upload the recording to Gemini, extract the ordered steps as schema-constrained JSON, and
+// return them. Screenshots (M3) and the <3min duration guard (M3, needs frames.ts) come next.
 export async function POST(request: Request): Promise<Response> {
   const form = await request.formData();
 
@@ -32,21 +48,25 @@ export async function POST(request: Request): Promise<Response> {
     columns = result.columns;
   }
 
-  const stubStep = (n: number): Step => ({
-    values: Object.fromEntries(
-      columns.map((c) => [c.key, `[stub] ${c.label} for step ${n}`]),
-    ),
-    timestamp: n === 1 ? "00:03" : "00:10",
-    timestampSeconds: n === 1 ? 3 : 10,
-    screenshot: null,
-  });
+  const mimeType = inferMimeType(video.name, video.type);
+  const tempPath = join(tmpdir(), `${randomUUID()}-${video.name}`);
 
-  const body: ProcessResult = {
-    steps: [stubStep(1), stubStep(2)],
-    columns,
-    videoName: video.name,
-    model: "stub",
-  };
+  try {
+    await writeFile(tempPath, Buffer.from(await video.arrayBuffer()));
 
-  return Response.json(body);
+    const uploaded = await uploadVideo(tempPath, mimeType);
+    const { steps, model } = await extractSteps({
+      fileUri: uploaded.fileUri,
+      mimeType: uploaded.mimeType,
+      columns,
+    });
+
+    const body: ProcessResult = { steps, columns, videoName: video.name, model };
+    return Response.json(body);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "processing failed";
+    return Response.json({ error: message }, { status: 500 });
+  } finally {
+    await unlink(tempPath).catch(() => {});
+  }
 }
