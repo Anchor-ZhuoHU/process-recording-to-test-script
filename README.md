@@ -46,28 +46,40 @@ upload .mov/.mp4          Files API upload + poll ACTIVE        structured steps
 - **Signature (Part 2):** user-defined columns. One column config drives the Gemini prompt, a
   dynamically built response schema, and the table headers, built so a custom template cannot
   break generation.
-- **Stretch:** unit tests on the schema/column logic, Markdown/CSV export, saved column
-  templates, full-resolution screenshot download.
+- **Beyond the brief (shipped):** inline-editable result cells (correct Gemini's draft in place,
+  saved on blur) and CSV export (UTF-8 BOM so Excel keeps accented text).
 
-## Follow-ups (known gaps, deliberately deferred)
+## Roadmap and known gaps
 
-Scoped out of the prototype to keep the end-to-end flow correct within the time box. Each was
-considered and consciously postponed, not overlooked (see `DECISIONS.md`).
+Beyond Parts 1 and 2, two extras shipped: inline-editable result cells and CSV export. The next
+things I would build, in priority order (deliberately deferred within the time box, not overlooked;
+see `DECISIONS.md`):
 
-- **Durable video storage.** The upload is kept only as an ephemeral server temp file for the
-  duration of one request, then deleted. A real product would persist it to object storage
-  (S3 / GCS), register the GCS URI with the Gemini File API instead of re-uploading, and
-  re-process or serve it from there. The Gemini File API itself is not storage: it holds files
-  for 48h and cannot return the bytes. (DECISIONS D8.)
-- **Asynchronous processing.** Long videos run synchronously behind a loading state today; a
-  production version would use a job queue plus status polling. (DECISIONS D5.)
-- **Rate-limit resilience.** A Gemini `429` today surfaces as a failed request; production would
-  retry with backoff and optionally fall back to a second API key.
-- **Long-ID OCR misreads.** Gemini can occasionally misread long numeric IDs from the video
-  (nondeterministic); the per-step screenshot lets a user verify and correct them, and editable
-  result cells would make that a one-click fix. (DECISIONS D13.)
-- Unit tests on the schema/column logic, Markdown/CSV export, saved column templates, and
-  full-resolution screenshot download.
+**Export and hand-off**
+- **PDF export** with the screenshots embedded (the real artifact a consultant hands over).
+- **Markdown export** for wikis, Confluence, or GitHub.
+
+**Reviewing against the recording**
+- **Inline video preview** with click-a-step to seek the video to that step's timestamp.
+- **Adjust-and-re-grab a screenshot** by nudging a step's timestamp when a frame lands slightly off.
+
+**Editing the script**
+- **Step-list refinement**: reorder, merge, split, or delete steps; Gemini's granularity is a start.
+- **Saved column templates** per client (name and reload a template), matching the "different
+  clients, different templates" premise.
+
+**Generation quality**
+- **Output-language control** (e.g. force English) at generation time, complementing manual edits
+  for non-English (pt-BR) screens.
+- **Low-confidence flags** on long numeric IDs (DECISIONS D13) so a reviewer knows which cells to
+  double-check against the screenshot.
+
+**Production hardening** (out of scope for a prototype)
+- **Durable video storage** (S3 / GCS) instead of an ephemeral temp file. The Gemini File API is
+  not storage: it holds files for 48h and cannot return the bytes. (DECISIONS D8.)
+- **Asynchronous processing** with a job queue plus polling for long videos. (DECISIONS D5.)
+- **Rate-limit resilience**: retry with backoff on `429`, plus a backup key.
+- **Unit tests** on the pure logic (slugify, validateColumns, toCsv, buildResponseSchema, buildStepZod).
 
 ## Documentation
 
@@ -80,4 +92,12 @@ considered and consciously postponed, not overlooked (see `DECISIONS.md`).
 
 ## Quick start
 
-_Filled in at wrap; see `PLAN.md` in the meantime._
+```bash
+npm install
+cp .env.example .env.local   # then set GEMINI_API_KEY (get a key at aistudio.google.com/apikey)
+npm run dev                  # http://localhost:3000
+```
+
+Optionally edit the columns, choose a screen recording under 3 minutes (samples live in
+`resources/demo-videos/`), and click **Generate test script**. You get an editable table of steps
+with a screenshot each; edit any cell in place, then **Export CSV**.

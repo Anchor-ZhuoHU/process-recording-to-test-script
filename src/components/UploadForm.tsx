@@ -55,21 +55,35 @@ export default function UploadForm({ columns, onLoading, onResult, onError }: Pr
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+      className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
     >
-      <input
-        type="file"
-        accept="video/*"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        className="text-sm"
-      />
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-fit rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-black"
-      >
-        {submitting ? "Generating..." : "Generate test script"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Styled label wraps a hidden file input, so the file picker reads as a real button. */}
+        <label
+          className={`cursor-pointer rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800 ${
+            submitting ? "pointer-events-none opacity-50" : ""
+          }`}
+        >
+          {file ? "Change video" : "Choose video"}
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            disabled={submitting}
+            className="hidden"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={submitting || !file}
+          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-black"
+        >
+          {submitting ? "Generating..." : "Generate test script"}
+        </button>
+        <span className="min-w-0 truncate text-sm text-zinc-500">
+          {file ? file.name : "No video chosen"}
+        </span>
+      </div>
     </form>
   );
 }

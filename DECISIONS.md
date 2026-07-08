@@ -165,3 +165,31 @@ was made. Newest at the bottom.
 - Why it matters: this free-text definition is the real signature of Part 2. Add/remove of fixed
   columns would be a weaker product; per-column instructions are what make it work across client
   templates. The UI reflects this: the description field is a textarea, since it is a real prompt.
+
+## D15. Editable results: the Gemini output is a draft the user corrects in place
+- Idea (Anchor): the extracted text must be editable, e.g. translate a pt-BR label to English or fix
+  a misread value. Click a cell to edit, click away (blur) to save.
+- Decision: value cells are contentEditable and commit to local table state on blur; timestamp and
+  screenshot stay read-only (editing a timestamp would not move the already-extracted frame). The
+  edited copy lives in StepsTable and feeds the export.
+- Why it matters: it matches the real workflow ("edit instead of author from scratch") and is the
+  direct mitigation for D13 (long-ID misreads) and pt-BR text: the human fixes the few cells Gemini
+  got wrong, with the screenshot right beside them.
+
+## D16. Export to CSV (the deliverable is a document)
+- Idea (Anchor): being able to export matters; CSV first, PDF next.
+- Decision: a client-side "Export CSV" button serializes the edited table to RFC-4180 CSV with a
+  UTF-8 BOM so Excel renders accented text correctly. Screenshots are omitted (images do not belong
+  in a CSV); the timestamp column keeps each row tied to the video. `toCsv` is a pure function kept
+  separate from the download, so it is unit-testable.
+- Why it matters: the output is a document consultants hand off, so getting it out of the app into
+  their own tools is the natural last step.
+
+## D17. Stretch shipped (editable + CSV); the rest is a documented roadmap, cut for time
+- Context: with Part 1 and Part 2 done and time short, we shipped the two highest-ROI extras and
+  stopped: editable results (product sense) and CSV export (hand-off).
+- Decision: PDF export, Markdown export, video preview with click-to-seek, step-list refinement,
+  saved templates, output-language control, and long-ID confidence flags are written up as a
+  prioritized roadmap in the README rather than built.
+- Why it matters: honest time-boxing. The brief says completion is not key but approach and
+  justifications are, so a clear prioritized roadmap beats a half-built feature.

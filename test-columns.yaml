@@ -1,0 +1,53 @@
+# Test templates for the column config UI.
+#
+# Each group below is a client "template". To test, open the app, put the label + description of a
+# group into the Columns section (one row per column), then run a demo video from
+# resources/demo-videos/. The four groups deliberately probe DIFFERENT directions of what Gemini can
+# produce from the same recording, so together they exercise the app's range.
+#
+# Not consumed by the app; this is a human reference for testing and copy-paste.
+
+templates:
+  - name: Default consultant test script
+    probes: verbatim action + detailed description + expected system state (the baseline)
+    columns:
+      - label: Action
+        description: High-level action taken, e.g. "Create purchase requisition".
+      - label: Description
+        description: "What the user did in detail: fields filled, buttons clicked, values entered."
+      - label: Expected Result
+        description: The expected system state or response after this step.
+
+  - name: QA automation (granular UI)
+    probes: precise UI element + exact input values (fine-grained, automation-oriented output)
+    columns:
+      - label: Test Step
+        description: One concrete user action, in the imperative voice.
+      - label: UI Element
+        description: The exact control interacted with (button label, field name, tab, or menu item).
+      - label: Input Value
+        description: The exact value typed or selected, verbatim from the screen. Leave empty if none.
+      - label: Expected Result
+        description: The observable result immediately after this action.
+
+  - name: Business analyst (reasoning + classification)
+    probes: inference (purpose), classification (module), and ID extraction (higher-level reasoning)
+    columns:
+      - label: Task
+        description: A short name for the task performed in this step.
+      - label: Business Purpose
+        description: Why this step is done in the business process. Infer the intent; do not copy the screen.
+      - label: ERP Module
+        description: Which ERP module or area this happens in (e.g. Procurement, Inventory, Finance).
+      - label: Reference Numbers
+        description: Any document, order, material, or supplier numbers visible in this step.
+
+  - name: Localization (normalize to English)
+    probes: language transformation (e.g. pt-BR screen text to English) + field/value capture
+    columns:
+      - label: Action (English)
+        description: The action, written in English. Translate any non-English on-screen text to English.
+      - label: Field and Value
+        description: The field changed and the value entered, with any non-English label translated to English.
+      - label: Notes
+        description: "Anything noteworthy: validation errors, warnings, or generated document numbers."
