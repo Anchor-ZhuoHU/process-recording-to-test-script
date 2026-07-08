@@ -152,3 +152,16 @@ was made. Newest at the bottom.
   and correct long IDs. Editable result cells (a stretch item) would make that a one-click fix.
 - Why it matters: honest about where the pipeline can err, and the product design (a screenshot per
   step) turns the weakness into something verifiable instead of hidden.
+
+## D14. Custom columns are semantically user-defined, not just add/remove (clarified with Anchor)
+- Question (Anchor): is each column fully defined by the user, i.e. does the per-column description
+  tell Gemini what to generate for it, rather than just toggling a fixed set of columns?
+- Answer: yes, and that is the intended reading of "define their own columns... different clients
+  have different templates." A column's label becomes its key and its description is a free-text
+  instruction; both are injected into the prompt and the responseSchema, so the user defines what a
+  column MEANS, not merely whether it is present.
+- Evidence: a fully custom template (Step Summary / UI Element, no defaults) produced correct,
+  differently-shaped output on the same video; adding a "Module" column filled it with "Procurement".
+- Why it matters: this free-text definition is the real signature of Part 2. Add/remove of fixed
+  columns would be a weaker product; per-column instructions are what make it work across client
+  templates. The UI reflects this: the description field is a textarea, since it is a real prompt.

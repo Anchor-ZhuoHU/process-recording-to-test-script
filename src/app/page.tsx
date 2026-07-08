@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { DEFAULT_COLUMNS } from "@/lib/columns";
 import type { ProcessResult } from "@/lib/types";
 import UploadForm from "@/components/UploadForm";
 import StepsTable from "@/components/StepsTable";
 import ProgressIndicator from "@/components/ProgressIndicator";
+import ColumnConfig, { defaultEditableColumns } from "@/components/ColumnConfig";
 
 export default function Home() {
-  // M4 makes this editable via ColumnConfig; for now it is the fixed default template.
-  const [columns] = useState(DEFAULT_COLUMNS);
+  // The column config is the single source of truth: it drives the Gemini prompt, the response
+  // schema, and the table headers (Part 2). The server re-derives keys, so the client tracks only
+  // label + description.
+  const [columns, setColumns] = useState(defaultEditableColumns);
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,12 +25,15 @@ export default function Home() {
         </p>
       </header>
 
-      <UploadForm
-        columns={columns}
-        onLoading={setLoading}
-        onResult={setResult}
-        onError={setError}
-      />
+      <div className="flex flex-col gap-4">
+        <ColumnConfig columns={columns} onChange={setColumns} disabled={loading} />
+        <UploadForm
+          columns={columns}
+          onLoading={setLoading}
+          onResult={setResult}
+          onError={setError}
+        />
+      </div>
 
       {loading && <ProgressIndicator />}
       {error && <p className="mt-6 text-sm text-red-600">{error}</p>}

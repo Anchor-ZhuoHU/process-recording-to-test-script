@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { ColumnDef, ProcessResult, ProcessError } from "@/lib/types";
+import type { ProcessResult, ProcessError } from "@/lib/types";
 
 type Props = {
-  columns: ColumnDef[];
+  columns: { label: string; description: string }[];
   onLoading: (v: boolean) => void;
   onResult: (r: ProcessResult) => void;
   onError: (e: string | null) => void;
