@@ -63,6 +63,9 @@ considered and consciously postponed, not overlooked (see `DECISIONS.md`).
   production version would use a job queue plus status polling. (DECISIONS D5.)
 - **Rate-limit resilience.** A Gemini `429` today surfaces as a failed request; production would
   retry with backoff and optionally fall back to a second API key.
+- **Long-ID OCR misreads.** Gemini can occasionally misread long numeric IDs from the video
+  (nondeterministic); the per-step screenshot lets a user verify and correct them, and editable
+  result cells would make that a one-click fix. (DECISIONS D13.)
 - Unit tests on the schema/column logic, Markdown/CSV export, saved column templates, and
   full-resolution screenshot download.
 

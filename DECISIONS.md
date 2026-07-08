@@ -128,3 +128,27 @@ was made. Newest at the bottom.
   against a double-fire.
 - Why it matters: a synchronous long call needs a liveness signal. A fake percentage would be
   dishonest; an elapsed timer is truthful and enough to reassure the user.
+
+## D12. ffmpeg-static must be external to the bundle (bug caught in M3 end-to-end testing)
+- Symptom: once the route was wired, every screenshot came back null and the <3min guard never
+  fired, yet the identical ffmpeg-static call worked in a standalone Node script.
+- Cause: Next/Turbopack bundles the route and rewrites the path ffmpeg-static derives from its own
+  file location to a non-existent bundled location, so every spawn failed silently (probe returned
+  null, extractFrame rejected, both swallowed by design).
+- Decision: add `serverExternalPackages: ["ffmpeg-static"]` to next.config.ts so Node resolves the
+  binary from node_modules at runtime. Verified after the fix: 11/11 screenshots populate and a
+  >3min video is rejected in 0.05s. (A production build would also need the binary traced into output.)
+- Why it matters: only a real end-to-end run surfaced this; typecheck and a standalone script both
+  passed. It is exactly why each milestone ends with a live run, not just tsc.
+
+## D13. Known limitation: Gemini can misread long numeric IDs (mitigated by per-step screenshots)
+- Finding (verification session): on one run the model read a supplier ID as 17100001 instead of
+  17300001 (likely contaminated by the plant prefix 1710). A nondeterministic video-OCR misread, not
+  an app or encoding bug; a re-run read it correctly and all field/action names were faithful.
+- Decision: accept it as an inherent model limitation rather than over-tuning. Raising
+  `mediaResolution` cost ~4x with no accuracy win in the probe; lowering temperature is an untested
+  change this late and would invalidate the verified config.
+- Mitigation: every step already carries the exact screenshot of that moment, so a user can spot-check
+  and correct long IDs. Editable result cells (a stretch item) would make that a one-click fix.
+- Why it matters: honest about where the pipeline can err, and the product design (a screenshot per
+  step) turns the weakness into something verifiable instead of hidden.

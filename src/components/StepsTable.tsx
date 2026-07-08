@@ -1,4 +1,5 @@
 import type { ProcessResult } from "@/lib/types";
+import Screenshot from "./Screenshot";
 
 type Props = { result: ProcessResult };
 
@@ -31,12 +32,7 @@ export default function StepsTable({ result }: Props) {
               ))}
               <td className="px-3 py-2 whitespace-nowrap tabular-nums">{step.timestamp}</td>
               <td className="px-3 py-2">
-                {step.screenshot ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={step.screenshot} alt={`Step ${i + 1}`} className="h-16 rounded" />
-                ) : (
-                  <span className="text-xs text-zinc-400">no frame</span>
-                )}
+                <Screenshot src={step.screenshot} alt={`Step ${i + 1}`} />
               </td>
             </tr>
           ))}

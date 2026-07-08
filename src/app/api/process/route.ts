@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DEFAULT_COLUMNS, validateColumns } from "@/lib/columns";
 import { uploadVideo, extractSteps } from "@/lib/gemini";
+import { extractFrame, toDataUri, probeDurationSeconds } from "@/lib/frames";
 import type { ProcessResult } from "@/lib/types";
 
 // The pipeline needs Node APIs (temp files, and ffmpeg spawn in M3), and video processing is slow,
@@ -22,8 +23,8 @@ function inferMimeType(name: string, provided: string): string {
   return "video/mp4";
 }
 
-// M2: upload the recording to Gemini, extract the ordered steps as schema-constrained JSON, and
-// return them. Screenshots (M3) and the <3min duration guard (M3, needs frames.ts) come next.
+// Upload the recording to Gemini, extract the ordered steps as schema-constrained JSON, reject
+// videos over 3 minutes up front (D9), and attach an ffmpeg screenshot per step.
 export async function POST(request: Request): Promise<Response> {
   const form = await request.formData();
 
@@ -54,12 +55,33 @@ export async function POST(request: Request): Promise<Response> {
   try {
     await writeFile(tempPath, Buffer.from(await video.arrayBuffer()));
 
+    const duration = await probeDurationSeconds(tempPath);
+    if (duration !== null && duration > 180) {
+      return Response.json({ error: "video must be under 3 minutes" }, { status: 400 });
+    }
+
     const uploaded = await uploadVideo(tempPath, mimeType);
     const { steps, model } = await extractSteps({
       fileUri: uploaded.fileUri,
       mimeType: uploaded.mimeType,
       columns,
     });
+
+    // Attach a screenshot per step. A single frame failure degrades that cell to null and never
+    // fails the whole run. Seek is clamped just inside the duration when we know it.
+    await Promise.all(
+      steps.map(async (step) => {
+        const seconds =
+          duration !== null
+            ? Math.min(step.timestampSeconds, Math.max(0, duration - 0.1))
+            : step.timestampSeconds;
+        try {
+          step.screenshot = toDataUri(await extractFrame(tempPath, seconds));
+        } catch {
+          step.screenshot = null;
+        }
+      }),
+    );
 
     const body: ProcessResult = { steps, columns, videoName: video.name, model };
     return Response.json(body);
