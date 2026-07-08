@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# process-recording-to-test-script
 
-## Getting Started
+Turn a screen recording of a business process into a structured **test script**: an ordered
+list of steps, each with an action, a description, an expected result, a timestamp, and a
+screenshot of the screen at that moment.
 
-First, run the development server:
+## Why
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Consultants at system integrators hand-write "test scripts" that document how to perform a
+process (e.g. creating a purchase order). A 2-minute process can take 45 minutes to document
+by hand. This app ingests the recording and uses the Gemini Video Understanding API to produce
+the step list automatically, so the consultant edits instead of authoring from scratch.
+
+## How it works
+
+```
+upload .mov/.mp4          Files API upload + poll ACTIVE        structured steps (JSON)
+   (browser)         ->        (/api/process)             ->     (Gemini, one row per step)
+                                                                          |
+              table w/ screenshots   <-   ffmpeg extracts a frame   <-  MM:SS timestamp per step
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. User configures the columns they want (or uses the default template) and uploads a recording.
+2. The backend uploads the video to the Gemini File API, then asks Gemini for an ordered list of
+   steps as schema-constrained JSON, one field per configured column plus an `MM:SS` timestamp.
+3. For each step, the backend seeks the video to that timestamp with ffmpeg and extracts a
+   downscaled JPEG screenshot.
+4. The frontend renders the steps as a table with inline screenshots.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js (App Router, TypeScript)** — frontend and API routes in one repo; the company's own
+  recommendation and the shortest path to a running end-to-end slice.
+- **`@google/genai`** — Gemini File API upload plus `generateContent` with a `responseSchema`
+  for reliable structured output.
+- **`ffmpeg-static`** — bundled ffmpeg binary spawned directly to extract frames; reviewers need
+  no system ffmpeg install.
+- **`zod`** — validates the column config and tolerantly parses Gemini's JSON so a bad template
+  degrades a cell instead of crashing the run.
+- **Tailwind CSS** — clean, professional table and form UI.
 
-## Learn More
+## Scope
 
-To learn more about Next.js, take a look at the following resources:
+- **MVP (Part 1):** upload a video, get a table of steps with Action / Description / Expected
+  Result / Timestamp / Screenshot.
+- **Signature (Part 2):** user-defined columns. One column config drives the Gemini prompt, a
+  dynamically built response schema, and the table headers, built so a custom template cannot
+  break generation.
+- **Stretch:** unit tests on the schema/column logic, Markdown/CSV export, saved column
+  templates, full-resolution screenshot download.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Follow-ups (known gaps, deliberately deferred)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Scoped out of the prototype to keep the end-to-end flow correct within the time box. Each was
+considered and consciously postponed, not overlooked (see `DECISIONS.md`).
 
-## Deploy on Vercel
+- **Durable video storage.** The upload is kept only as an ephemeral server temp file for the
+  duration of one request, then deleted. A real product would persist it to object storage
+  (S3 / GCS), register the GCS URI with the Gemini File API instead of re-uploading, and
+  re-process or serve it from there. The Gemini File API itself is not storage: it holds files
+  for 48h and cannot return the bytes. (DECISIONS D8.)
+- **Asynchronous processing.** Long videos run synchronously behind a loading state today; a
+  production version would use a job queue plus status polling. (DECISIONS D5.)
+- Unit tests on the schema/column logic, Markdown/CSV export, saved column templates, and
+  full-resolution screenshot download.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Documentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `PLAN.md` — the step-by-step build plan and time boxes.
+- `DECISIONS.md` — the running log of decisions and tradeoffs (the walkthrough spine).
+- `resources/`: provided assignment materials (instruction PDF, demo videos, Gemini API docs);
+  kept locally and gitignored, so they are not part of this public repo.
+
+## Quick start
+
+_Filled in at wrap; see `PLAN.md` in the meantime._
