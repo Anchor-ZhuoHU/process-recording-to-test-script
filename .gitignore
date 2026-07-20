@@ -41,12 +41,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# take-home provided materials. Two files directly under resources/ ARE shipped: the assignment
-# brief (instruction.pdf, the root of this project) and our verified API writeup
+# take-home provided materials. Two files directly under resources/ ARE shipped: an own-words
+# summary of the assignment brief (brief.md) and our verified API writeup
 # (instruction-google-api.md, our learning output). Everything else under resources/, including all
 # subfolders (demo videos, vendor API docs), stays local-only.
 /resources/*
-!/resources/instruction.pdf
+!/resources/brief.md
 !/resources/instruction-google-api.md
 
 # throwaway spikes (e.g. live-API model probes) run against .env.local; not shipped.
