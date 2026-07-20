@@ -85,8 +85,8 @@ see `DECISIONS.md`):
 
 - `PLAN.md` — the step-by-step build plan and time boxes.
 - `DECISIONS.md` — the running log of decisions and tradeoffs (the walkthrough spine).
-- `resources/brief.md`: an own-words summary of the assignment brief this project is built
-  from (the original document belongs to the issuing company and is not included).
+- `resources/brief.md`: a verbatim transcription of the assignment brief this project is built
+  from (the original PDF is withheld; its API key and file links are redacted).
 - `resources/instruction-google-api.md`: the empirically verified Gemini API reference (the
   learning output that `lib/gemini.ts` and `lib/schema.ts` were built against).
 - `resources/` also holds the demo videos and vendor API docs, which stay local-only (gitignored).

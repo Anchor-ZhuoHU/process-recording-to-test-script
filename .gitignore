@@ -41,8 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# take-home provided materials. Two files directly under resources/ ARE shipped: an own-words
-# summary of the assignment brief (brief.md) and our verified API writeup
+# take-home provided materials. Two files directly under resources/ ARE shipped: a verbatim
+# transcription of the assignment brief (brief.md, credentials/links redacted) and our verified API writeup
 # (instruction-google-api.md, our learning output). Everything else under resources/, including all
 # subfolders (demo videos, vendor API docs), stays local-only.
 /resources/*
