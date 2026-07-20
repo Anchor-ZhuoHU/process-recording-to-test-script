@@ -86,7 +86,8 @@ see `DECISIONS.md`):
 - `PLAN.md` — the step-by-step build plan and time boxes.
 - `DECISIONS.md` — the running log of decisions and tradeoffs (the walkthrough spine).
 - `resources/brief.md`: a verbatim transcription of the assignment brief this project is built
-  from (the original PDF is withheld; its API key and file links are redacted).
+  from (the original PDF is withheld; its API key is redacted, and the sample videos are
+  linked from my own shared folder).
 - `resources/instruction-google-api.md`: the empirically verified Gemini API reference (the
   learning output that `lib/gemini.ts` and `lib/schema.ts` were built against).
 - `resources/` also holds the demo videos and vendor API docs, which stay local-only (gitignored).
@@ -100,5 +101,7 @@ npm run dev                  # http://localhost:3000
 ```
 
 Optionally edit the columns, choose a screen recording under 3 minutes (samples live in
-`resources/demo-videos/`), and click **Generate test script**. You get an editable table of steps
+`resources/demo-videos/` locally, and are shared
+[here](https://drive.google.com/drive/folders/1DKdyQTxiAWhL0bo_pDa6XWFpMco8ly0K?usp=sharing)),
+and click **Generate test script**. You get an editable table of steps
 with a screenshot each; edit any cell in place, then **Export CSV**.

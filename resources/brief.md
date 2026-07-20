@@ -3,7 +3,8 @@
 > Verbatim transcription of the assignment brief (a PDF handed to me in another company's
 > interview process). The original file is withheld from this repo because it embeds the
 > issuing company's file links and an API key. The text below is 1:1, with only the API key
-> and the example-video link redacted, and typography lightly normalized for markdown.
+> redacted and the example-videos link replaced with my own shared folder; typography is
+> lightly normalized for markdown.
 
 ## Time/format
 
@@ -32,8 +33,9 @@ most comfortable with.
 
 ## Resources
 
-- Example videos - feel free to use these as the input *(shared-folder link redacted: it is the
-  issuing company's)*
+- [Example videos](https://drive.google.com/drive/folders/1DKdyQTxiAWhL0bo_pDa6XWFpMco8ly0K?usp=sharing) -
+  feel free to use these as the input *(link replaced with my own shared folder of the sample
+  videos)*
 - Gemini API Key (for video processing) *(redacted)*
 
 ## Expectations and success criteria
