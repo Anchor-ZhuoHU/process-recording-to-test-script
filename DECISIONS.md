@@ -1,6 +1,6 @@
 # DECISIONS.md — Process Recording take-home
 
-- **Company:** the company (work trial)
+- **Company:** redacted (a timed work-trial round in another company's interview process)
 - **Date:** 2026-07-08
 - **Window:** 3h build + 30m debrief (present ~6:30 PM ET / 3:30 PM PT)
 - **Project:** Upload a screen recording of a business process, use Gemini Video Understanding
